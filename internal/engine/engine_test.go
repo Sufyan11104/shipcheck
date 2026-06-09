@@ -16,19 +16,36 @@ func TestEngine_RunChecks_AllPass(t *testing.T) {
 	os.Create(filepath.Join(tmpDir, ".gitignore"))
 	os.Create(filepath.Join(tmpDir, ".env.example"))
 
+	// Create a proper Dockerfile with all good practices
+	dockerfileContent := `FROM alpine:latest
+RUN adduser -D appuser
+HEALTHCHECK CMD echo 'ok'
+COPY app /app
+ENV APP_NAME=myapp
+USER appuser
+`
+	os.WriteFile(filepath.Join(tmpDir, "Dockerfile"), []byte(dockerfileContent), 0644)
+	os.Create(filepath.Join(tmpDir, ".dockerignore"))
+
 	engine := NewEngine(tmpDir)
 	findings, score := engine.RunChecks(true)
 
-	if len(findings) != 4 {
-		t.Errorf("expected 4 findings, got %d", len(findings))
+	if len(findings) != 10 {
+		t.Errorf("expected 10 findings, got %d", len(findings))
 	}
 
 	// Check that we have the right findings
 	expectedIDs := map[string]bool{
-		"docs.readme_exists":         false,
-		"repo.gitignore_exists":      false,
-		"env.env_not_committed":      false,
-		"env.env_example_exists":     false,
+		"docs.readme_exists":                 false,
+		"repo.gitignore_exists":              false,
+		"env.env_not_committed":              false,
+		"env.env_example_exists":             false,
+		"docker.dockerfile_exists":           false,
+		"docker.dockerignore_exists":         false,
+		"docker.dockerfile_non_root_user":    false,
+		"docker.dockerfile_healthcheck":      false,
+		"docker.dockerfile_no_env_copy":      false,
+		"docker.dockerfile_no_secret_env":    false,
 	}
 
 	for _, f := range findings {
@@ -52,7 +69,7 @@ func TestEngine_RunChecks_AllPass(t *testing.T) {
 func TestEngine_RunChecks_WithWarnings(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Create some files but not .env.example
+	// Create some files but not .env.example or Dockerfile
 	os.Create(filepath.Join(tmpDir, "README.md"))
 	os.Create(filepath.Join(tmpDir, ".gitignore"))
 
