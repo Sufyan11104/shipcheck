@@ -43,11 +43,41 @@ jobs:
 `
 	os.WriteFile(filepath.Join(workflowsPath, "ci.yml"), []byte(workflowContent), 0644)
 
+	// Create Kubernetes manifest
+	k8sContent := `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: app
+        image: myapp:v1.0
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+`
+	os.WriteFile(filepath.Join(tmpDir, "deployment.yaml"), []byte(k8sContent), 0644)
+
 	engine := NewEngine(tmpDir)
 	findings, score := engine.RunChecks(true)
 
-	if len(findings) != 18 {
-		t.Errorf("expected 18 findings, got %d", len(findings))
+	if len(findings) != 26 {
+		t.Errorf("expected 26 findings, got %d", len(findings))
 	}
 
 	// Check that we have the right findings
@@ -70,6 +100,14 @@ jobs:
 		"ci.actions_pinned":               false,
 		"ci.no_secret_echo":               false,
 		"ci.permissions_declared":         false,
+		"k8s.manifest_exists":             false,
+		"k8s.workload_exists":             false,
+		"k8s.readiness_probe_exists":      false,
+		"k8s.liveness_probe_exists":       false,
+		"k8s.resource_requests_exists":    false,
+		"k8s.resource_limits_exists":      false,
+		"k8s.no_latest_image_tag":         false,
+		"k8s.replicas_configured":         false,
 	}
 
 	for _, f := range findings {

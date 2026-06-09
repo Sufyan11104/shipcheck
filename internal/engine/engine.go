@@ -42,6 +42,16 @@ func (e *Engine) RunChecks(isGitRepo bool) ([]rules.Finding, int) {
 	findings = append(findings, rules.CheckNoSecretEcho(e.path))
 	findings = append(findings, rules.CheckPermissionsDeclared(e.path))
 
+	// Run Kubernetes checks
+	findings = append(findings, rules.CheckK8sManifestExists(e.path))
+	findings = append(findings, rules.CheckK8sWorkloadExists(e.path))
+	findings = append(findings, rules.CheckK8sReadinessProbeExists(e.path))
+	findings = append(findings, rules.CheckK8sLivenessProbeExists(e.path))
+	findings = append(findings, rules.CheckK8sResourceRequests(e.path))
+	findings = append(findings, rules.CheckK8sResourceLimits(e.path))
+	findings = append(findings, rules.CheckK8sNoLatestImageTag(e.path))
+	findings = append(findings, rules.CheckK8sReplicasConfigured(e.path))
+
 	// Calculate score
 	score := CalculateScore(findings)
 
