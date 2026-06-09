@@ -32,6 +32,16 @@ func (e *Engine) RunChecks(isGitRepo bool) ([]rules.Finding, int) {
 	findings = append(findings, rules.CheckDockerfileNoEnvCopy(e.path))
 	findings = append(findings, rules.CheckDockerfileNoSecretEnv(e.path))
 
+	// Run GitHub Actions checks
+	findings = append(findings, rules.CheckWorkflowsDirExists(e.path))
+	findings = append(findings, rules.CheckWorkflowFileExists(e.path))
+	findings = append(findings, rules.CheckTestStepExists(e.path))
+	findings = append(findings, rules.CheckBuildStepExists(e.path))
+	findings = append(findings, rules.CheckDeployAfterTests(e.path))
+	findings = append(findings, rules.CheckActionsPinned(e.path))
+	findings = append(findings, rules.CheckNoSecretEcho(e.path))
+	findings = append(findings, rules.CheckPermissionsDeclared(e.path))
+
 	// Calculate score
 	score := CalculateScore(findings)
 

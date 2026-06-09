@@ -1,17 +1,18 @@
 # ShipCheck
 
-**Status: Early WIP - Stage 3**
+**Status: Early WIP - Stage 4**
 
 A Go CLI static-analysis tool that audits repositories for deployment readiness.
 
-## Current Capabilities (Stage 3)
+## Current Capabilities (Stage 4)
 
 - CLI with `version` and `audit` commands
 - Directory scanning (file and directory counting)
 - Git repository detection
-- **Rule engine with 10 checks across 3 categories:**
+- **Rule engine with 18 checks across 4 categories:**
   - **Repository hygiene (4):** README, .gitignore, .env, .env.example
   - **Docker readiness (6):** Dockerfile presence, .dockerignore, non-root USER, HEALTHCHECK, .env copy detection, secret-like ENV/ARG detection
+  - **GitHub Actions CI/CD (8):** Workflows directory, workflow files, test steps, build steps, deploy order, action version pinning, secret echo detection, permissions block
 - **Deployment readiness scoring (0-100)**
   - Automatic score calculation based on findings
   - Different weight penalties for high/medium/low severity findings
@@ -20,7 +21,6 @@ A Go CLI static-analysis tool that audits repositories for deployment readiness.
 ## Planned Features
 
 Future stages will add:
-- GitHub Actions workflow validation
 - Kubernetes manifest audits
 - Terraform code analysis
 - Multiple report formats (JSON, Markdown, SARIF)
@@ -58,7 +58,7 @@ make test
 - **CLI entrypoint**: `cmd/shipcheck/main.go`
 - **CLI routing**: `internal/cli/root.go`
 - **Scanner logic**: `internal/scanner/scanner.go`
-- **Rule definitions**: `internal/rules/` (types.go, checks.go, docker.go)
+- **Rule definitions**: `internal/rules/` (types.go, checks.go, docker.go, github_actions.go)
 - **Audit engine**: `internal/engine/engine.go`
 - **Scoring logic**: `internal/engine/scoring.go`
 - **Report formatting**: `internal/report/text.go`

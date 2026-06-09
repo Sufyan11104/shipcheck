@@ -27,25 +27,49 @@ USER appuser
 	os.WriteFile(filepath.Join(tmpDir, "Dockerfile"), []byte(dockerfileContent), 0644)
 	os.Create(filepath.Join(tmpDir, ".dockerignore"))
 
+	// Create GitHub Actions workflow
+	workflowsPath := filepath.Join(tmpDir, ".github", "workflows")
+	os.MkdirAll(workflowsPath, 0755)
+	workflowContent := `on: push
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: go test ./...
+      - run: go build ./...
+`
+	os.WriteFile(filepath.Join(workflowsPath, "ci.yml"), []byte(workflowContent), 0644)
+
 	engine := NewEngine(tmpDir)
 	findings, score := engine.RunChecks(true)
 
-	if len(findings) != 10 {
-		t.Errorf("expected 10 findings, got %d", len(findings))
+	if len(findings) != 18 {
+		t.Errorf("expected 18 findings, got %d", len(findings))
 	}
 
 	// Check that we have the right findings
 	expectedIDs := map[string]bool{
-		"docs.readme_exists":                 false,
-		"repo.gitignore_exists":              false,
-		"env.env_not_committed":              false,
-		"env.env_example_exists":             false,
-		"docker.dockerfile_exists":           false,
-		"docker.dockerignore_exists":         false,
-		"docker.dockerfile_non_root_user":    false,
-		"docker.dockerfile_healthcheck":      false,
-		"docker.dockerfile_no_env_copy":      false,
-		"docker.dockerfile_no_secret_env":    false,
+		"docs.readme_exists":              false,
+		"repo.gitignore_exists":           false,
+		"env.env_not_committed":           false,
+		"env.env_example_exists":          false,
+		"docker.dockerfile_exists":        false,
+		"docker.dockerignore_exists":      false,
+		"docker.dockerfile_non_root_user": false,
+		"docker.dockerfile_healthcheck":   false,
+		"docker.dockerfile_no_env_copy":   false,
+		"docker.dockerfile_no_secret_env": false,
+		"ci.workflows_dir_exists":         false,
+		"ci.workflow_file_exists":         false,
+		"ci.test_step_exists":             false,
+		"ci.build_step_exists":            false,
+		"ci.deploy_after_tests":           false,
+		"ci.actions_pinned":               false,
+		"ci.no_secret_echo":               false,
+		"ci.permissions_declared":         false,
 	}
 
 	for _, f := range findings {
