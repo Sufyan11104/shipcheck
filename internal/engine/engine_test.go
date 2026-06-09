@@ -40,6 +40,8 @@ jobs:
       - uses: actions/checkout@v4
       - run: go test ./...
       - run: go build ./...
+      - run: terraform fmt -check -recursive
+      - run: terraform validate
 `
 	os.WriteFile(filepath.Join(workflowsPath, "ci.yml"), []byte(workflowContent), 0644)
 
@@ -73,41 +75,72 @@ spec:
 `
 	os.WriteFile(filepath.Join(tmpDir, "deployment.yaml"), []byte(k8sContent), 0644)
 
+	// Create Terraform configuration
+	terraformContent := `terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
+  backend "s3" {
+    bucket = "example-state"
+    key    = "terraform.tfstate"
+    region = "eu-west-2"
+  }
+}
+
+variable "environment" {
+  default = "prod"
+}
+`
+	os.WriteFile(filepath.Join(tmpDir, "main.tf"), []byte(terraformContent), 0644)
+	os.WriteFile(filepath.Join(tmpDir, ".terraform.lock.hcl"), []byte(`provider "registry.terraform.io/hashicorp/aws" {}`), 0644)
+
 	engine := NewEngine(tmpDir)
 	findings, score := engine.RunChecks(true)
 
-	if len(findings) != 26 {
-		t.Errorf("expected 26 findings, got %d", len(findings))
+	if len(findings) != 34 {
+		t.Errorf("expected 34 findings, got %d", len(findings))
 	}
 
 	// Check that we have the right findings
 	expectedIDs := map[string]bool{
-		"docs.readme_exists":              false,
-		"repo.gitignore_exists":           false,
-		"env.env_not_committed":           false,
-		"env.env_example_exists":          false,
-		"docker.dockerfile_exists":        false,
-		"docker.dockerignore_exists":      false,
-		"docker.dockerfile_non_root_user": false,
-		"docker.dockerfile_healthcheck":   false,
-		"docker.dockerfile_no_env_copy":   false,
-		"docker.dockerfile_no_secret_env": false,
-		"ci.workflows_dir_exists":         false,
-		"ci.workflow_file_exists":         false,
-		"ci.test_step_exists":             false,
-		"ci.build_step_exists":            false,
-		"ci.deploy_after_tests":           false,
-		"ci.actions_pinned":               false,
-		"ci.no_secret_echo":               false,
-		"ci.permissions_declared":         false,
-		"k8s.manifest_exists":             false,
-		"k8s.workload_exists":             false,
-		"k8s.readiness_probe_exists":      false,
-		"k8s.liveness_probe_exists":       false,
-		"k8s.resource_requests_exists":    false,
-		"k8s.resource_limits_exists":      false,
-		"k8s.no_latest_image_tag":         false,
-		"k8s.replicas_configured":         false,
+		"docs.readme_exists":                        false,
+		"repo.gitignore_exists":                     false,
+		"env.env_not_committed":                     false,
+		"env.env_example_exists":                    false,
+		"docker.dockerfile_exists":                  false,
+		"docker.dockerignore_exists":                false,
+		"docker.dockerfile_non_root_user":           false,
+		"docker.dockerfile_healthcheck":             false,
+		"docker.dockerfile_no_env_copy":             false,
+		"docker.dockerfile_no_secret_env":           false,
+		"ci.workflows_dir_exists":                   false,
+		"ci.workflow_file_exists":                   false,
+		"ci.test_step_exists":                       false,
+		"ci.build_step_exists":                      false,
+		"ci.deploy_after_tests":                     false,
+		"ci.actions_pinned":                         false,
+		"ci.no_secret_echo":                         false,
+		"ci.permissions_declared":                   false,
+		"k8s.manifest_exists":                       false,
+		"k8s.workload_exists":                       false,
+		"k8s.readiness_probe_exists":                false,
+		"k8s.liveness_probe_exists":                 false,
+		"k8s.resource_requests_exists":              false,
+		"k8s.resource_limits_exists":                false,
+		"k8s.no_latest_image_tag":                   false,
+		"k8s.replicas_configured":                   false,
+		"terraform.files_exist":                     false,
+		"terraform.fmt_recommended":                 false,
+		"terraform.validate_recommended":            false,
+		"terraform.required_providers_exists":       false,
+		"terraform.provider_versions_constrained":   false,
+		"terraform.backend_configured":              false,
+		"terraform.no_suspicious_variable_defaults": false,
+		"terraform.lockfile_present":                false,
 	}
 
 	for _, f := range findings {

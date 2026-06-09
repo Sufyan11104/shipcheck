@@ -52,6 +52,16 @@ func (e *Engine) RunChecks(isGitRepo bool) ([]rules.Finding, int) {
 	findings = append(findings, rules.CheckK8sNoLatestImageTag(e.path))
 	findings = append(findings, rules.CheckK8sReplicasConfigured(e.path))
 
+	// Run Terraform/IaC checks
+	findings = append(findings, rules.CheckTerraformFilesExist(e.path))
+	findings = append(findings, rules.CheckTerraformFmtRecommended(e.path))
+	findings = append(findings, rules.CheckTerraformValidateRecommended(e.path))
+	findings = append(findings, rules.CheckTerraformRequiredProvidersExists(e.path))
+	findings = append(findings, rules.CheckTerraformProviderVersionsConstrained(e.path))
+	findings = append(findings, rules.CheckTerraformBackendConfigured(e.path))
+	findings = append(findings, rules.CheckTerraformNoSuspiciousVariableDefaults(e.path))
+	findings = append(findings, rules.CheckTerraformLockfilePresent(e.path))
+
 	// Calculate score
 	score := CalculateScore(findings)
 
