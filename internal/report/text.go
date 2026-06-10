@@ -2,6 +2,8 @@ package report
 
 import (
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/Sufyan11104/shipcheck/internal/engine"
 	"github.com/Sufyan11104/shipcheck/internal/rules"
@@ -14,17 +16,19 @@ func PrintTextReport(result *scanner.ScanResult) error {
 		return result.Error
 	}
 
-	gitRepo := "no"
-	if result.IsGitRepository {
-		gitRepo = "yes"
-	}
-
-	// Run the audit engine
 	eng := engine.NewEngine(result.Path)
 	findings, score := eng.RunChecks(result.IsGitRepository)
+	auditReport := NewAuditReport(result, findings, score)
 
-	// Summarize findings
-	passed, warned, failed := engine.SummarizeFindings(findings)
+	return RenderText(os.Stdout, auditReport)
+}
+
+// RenderText writes a text-based deployment readiness report.
+func RenderText(w io.Writer, auditReport AuditReport) error {
+	gitRepo := "no"
+	if auditReport.GitRepository {
+		gitRepo = "yes"
+	}
 
 	report := fmt.Sprintf(`ShipCheck Deployment Readiness Report
 Path: %s
@@ -38,14 +42,18 @@ Warnings: %d
 Failed: %d
 
 Findings:
-`, result.Path, gitRepo, result.FileCount, result.DirectoryCount, score, passed, warned, failed)
+`, auditReport.Path, gitRepo, auditReport.FilesScanned, auditReport.DirectoriesScanned, auditReport.Score, auditReport.PassedCount, auditReport.WarningCount, auditReport.FailedCount)
 
-	fmt.Print(report)
+	if _, err := fmt.Fprint(w, report); err != nil {
+		return err
+	}
 
 	// Print each finding
-	for _, finding := range findings {
+	for _, finding := range auditReport.Findings {
 		symbol := getSymbol(finding.Status)
-		fmt.Printf("%s %s - %s\n", symbol, finding.ID, finding.Message)
+		if _, err := fmt.Fprintf(w, "%s %s - %s\n", symbol, finding.ID, finding.Message); err != nil {
+			return err
+		}
 	}
 
 	return nil

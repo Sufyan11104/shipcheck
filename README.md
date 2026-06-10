@@ -1,10 +1,10 @@
 # ShipCheck
 
-**Status: Early WIP - Stage 6**
+**Status: Early WIP - Stage 7**
 
 A Go CLI static-analysis tool that audits repositories for deployment readiness.
 
-## Current Capabilities (Stage 6)
+## Current Capabilities (Stage 7)
 
 - CLI with `version` and `audit` commands
 - Directory scanning (file and directory counting)
@@ -19,11 +19,13 @@ A Go CLI static-analysis tool that audits repositories for deployment readiness.
   - Automatic score calculation based on findings
   - Different weight penalties for high/medium/low severity findings
   - Pass/warn/fail status categorization
+- Text, JSON, and Markdown report output
+- CI-friendly audit flags for score thresholds and category filtering
 
 ## Planned Features
 
 Future stages will add:
-- Multiple report formats (JSON, Markdown, SARIF)
+- SARIF output
 - Rule engine with suppressions and custom rules
 - Configuration file support
 - CI/CD integration with configurable thresholds
@@ -45,6 +47,17 @@ make run
 
 # Or directly
 ./bin/shipcheck audit <path>
+
+# Select report format
+./bin/shipcheck audit <path> --format text
+./bin/shipcheck audit <path> --format json
+./bin/shipcheck audit <path> --format markdown
+
+# Filter by category
+./bin/shipcheck audit <path> --category docker,ci
+
+# Fail when the score is below a threshold
+./bin/shipcheck audit <path> --fail-under 80
 ```
 
 ## Testing
@@ -61,5 +74,5 @@ make test
 - **Rule definitions**: `internal/rules/` (types.go, checks.go, docker.go, github_actions.go, kubernetes.go, terraform.go)
 - **Audit engine**: `internal/engine/engine.go`
 - **Scoring logic**: `internal/engine/scoring.go`
-- **Report formatting**: `internal/report/text.go`
+- **Report formatting**: `internal/report/` (text.go, json.go, markdown.go)
 - **Version**: `internal/version/version.go`
