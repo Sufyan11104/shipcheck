@@ -56,7 +56,7 @@ func CheckTerraformFmtRecommended(path string) Finding {
 			Title:       "No Terraform configuration",
 			Category:    "terraform",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No .tf files present; skipping terraform fmt recommendation",
 			Remediation: "N/A",
 		}
@@ -93,7 +93,7 @@ func CheckTerraformValidateRecommended(path string) Finding {
 			Title:       "No Terraform configuration",
 			Category:    "terraform",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No .tf files present; skipping terraform validate recommendation",
 			Remediation: "N/A",
 		}
@@ -131,7 +131,7 @@ func CheckTerraformRequiredProvidersExists(path string) Finding {
 			Title:       "No Terraform configuration",
 			Category:    "terraform",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No .tf files present; skipping required_providers check",
 			Remediation: "N/A",
 		}
@@ -169,7 +169,7 @@ func CheckTerraformProviderVersionsConstrained(path string) Finding {
 			Title:       "No Terraform configuration",
 			Category:    "terraform",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No .tf files present; skipping provider version check",
 			Remediation: "N/A",
 		}
@@ -220,7 +220,7 @@ func CheckTerraformBackendConfigured(path string) Finding {
 			Title:       "No Terraform configuration",
 			Category:    "terraform",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No .tf files present; skipping backend check",
 			Remediation: "N/A",
 		}
@@ -259,7 +259,7 @@ func CheckTerraformNoSuspiciousVariableDefaults(path string) Finding {
 			Title:       "No Terraform configuration",
 			Category:    "terraform",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No .tf files present; skipping variable default check",
 			Remediation: "N/A",
 		}
@@ -296,7 +296,7 @@ func CheckTerraformLockfilePresent(path string) Finding {
 			Title:       "No Terraform configuration",
 			Category:    "terraform",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No .tf files present; skipping Terraform lockfile check",
 			Remediation: "N/A",
 		}

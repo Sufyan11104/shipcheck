@@ -35,8 +35,8 @@ func TestCheckTerraformFilesExist_TfvarsFileDetected(t *testing.T) {
 	}
 
 	deeperFinding := CheckTerraformRequiredProvidersExists(tmpDir)
-	if deeperFinding.Status != StatusPass {
-		t.Errorf("expected StatusPass skip for tfvars-only directory, got %v", deeperFinding.Status)
+	if deeperFinding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip for tfvars-only directory, got %v", deeperFinding.Status)
 	}
 }
 
@@ -213,8 +213,8 @@ func TestTerraformNoFilesSkipDeeperChecksCleanly(t *testing.T) {
 	}
 
 	for _, finding := range checks {
-		if finding.Status != StatusPass {
-			t.Errorf("expected %s to skip with StatusPass, got %v", finding.ID, finding.Status)
+		if finding.Status != StatusSkip {
+			t.Errorf("expected %s to skip with StatusSkip, got %v", finding.ID, finding.Status)
 		}
 	}
 }

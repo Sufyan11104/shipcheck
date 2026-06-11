@@ -43,7 +43,7 @@ func CheckK8sWorkloadExists(path string) Finding {
 			Title:       "No manifests found",
 			Category:    "k8s",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No Kubernetes manifests present; skipping workload check",
 			Remediation: "N/A",
 		}
@@ -80,7 +80,7 @@ func CheckK8sReadinessProbeExists(path string) Finding {
 			Title:       "No manifests found",
 			Category:    "k8s",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No Kubernetes manifests present; skipping readiness probe check",
 			Remediation: "N/A",
 		}
@@ -117,7 +117,7 @@ func CheckK8sLivenessProbeExists(path string) Finding {
 			Title:       "No manifests found",
 			Category:    "k8s",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No Kubernetes manifests present; skipping liveness probe check",
 			Remediation: "N/A",
 		}
@@ -154,7 +154,7 @@ func CheckK8sResourceRequests(path string) Finding {
 			Title:       "No manifests found",
 			Category:    "k8s",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No Kubernetes manifests present; skipping resource requests check",
 			Remediation: "N/A",
 		}
@@ -191,7 +191,7 @@ func CheckK8sResourceLimits(path string) Finding {
 			Title:       "No manifests found",
 			Category:    "k8s",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No Kubernetes manifests present; skipping resource limits check",
 			Remediation: "N/A",
 		}
@@ -228,7 +228,7 @@ func CheckK8sNoLatestImageTag(path string) Finding {
 			Title:       "No manifests found",
 			Category:    "k8s",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No Kubernetes manifests present; skipping image tag check",
 			Remediation: "N/A",
 		}
@@ -322,7 +322,7 @@ func CheckK8sReplicasConfigured(path string) Finding {
 			Title:       "No manifests found",
 			Category:    "k8s",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "No Kubernetes manifests present; skipping replicas check",
 			Remediation: "N/A",
 		}
@@ -398,7 +398,7 @@ func CheckK8sReplicasConfigured(path string) Finding {
 		Title:       "No Deployment found",
 		Category:    "k8s",
 		Severity:    SeverityLow,
-		Status:      StatusPass,
+		Status:      StatusSkip,
 		Message:     "No Deployment resource found; replicas check not applicable",
 		Remediation: "N/A",
 	}

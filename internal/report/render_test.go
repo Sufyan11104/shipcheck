@@ -24,6 +24,25 @@ func TestRenderText_DefaultFormatWorks(t *testing.T) {
 	}
 }
 
+func TestRenderText_RendersSkipAsNeutralStatus(t *testing.T) {
+	var buf bytes.Buffer
+
+	if err := RenderText(&buf, sampleAuditReportWithSkip()); err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	output := buf.String()
+	if !strings.Contains(output, "Skipped: 1") {
+		t.Errorf("expected skipped count in text report, got %s", output)
+	}
+	if !strings.Contains(output, "- docker.dockerfile_non_root_user - Dockerfile not present; skipping USER check") {
+		t.Errorf("expected skipped finding to use neutral symbol, got %s", output)
+	}
+	if strings.Contains(output, "✓ docker.dockerfile_non_root_user") {
+		t.Errorf("expected skipped finding not to render as passed, got %s", output)
+	}
+}
+
 func TestRender_InvalidFormat(t *testing.T) {
 	var buf bytes.Buffer
 
@@ -46,6 +65,7 @@ func sampleAuditReport() AuditReport {
 		PassedCount:        1,
 		WarningCount:       0,
 		FailedCount:        0,
+		SkippedCount:       0,
 		Findings: []ReportFinding{
 			{
 				ID:          "docker.dockerfile_exists",
@@ -58,4 +78,19 @@ func sampleAuditReport() AuditReport {
 			},
 		},
 	}
+}
+
+func sampleAuditReportWithSkip() AuditReport {
+	report := sampleAuditReport()
+	report.SkippedCount = 1
+	report.Findings = append(report.Findings, ReportFinding{
+		ID:          "docker.dockerfile_non_root_user",
+		Title:       "Dockerfile not found",
+		Category:    "docker",
+		Severity:    rules.SeverityLow,
+		Status:      rules.StatusSkip,
+		Message:     "Dockerfile not present; skipping USER check",
+		Remediation: "N/A",
+	})
+	return report
 }

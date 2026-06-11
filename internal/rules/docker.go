@@ -70,7 +70,7 @@ func CheckDockerfileNonRootUser(path string) Finding {
 			Title:       "Dockerfile not found",
 			Category:    "docker",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "Dockerfile not present; skipping USER check",
 			Remediation: "N/A",
 		}
@@ -122,7 +122,7 @@ func CheckDockerfileHealthcheck(path string) Finding {
 			Title:       "Dockerfile not found",
 			Category:    "docker",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "Dockerfile not present; skipping HEALTHCHECK check",
 			Remediation: "N/A",
 		}
@@ -167,7 +167,7 @@ func CheckDockerfileNoEnvCopy(path string) Finding {
 			Title:       "Dockerfile not found",
 			Category:    "docker",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "Dockerfile not present; skipping .env COPY check",
 			Remediation: "N/A",
 		}
@@ -214,7 +214,7 @@ func CheckDockerfileNoSecretEnv(path string) Finding {
 			Title:       "Dockerfile not found",
 			Category:    "docker",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     "Dockerfile not present; skipping secret ENV check",
 			Remediation: "N/A",
 		}

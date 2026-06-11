@@ -30,8 +30,8 @@ func CalculateScore(findings []rules.Finding) int {
 			case rules.SeverityLow:
 				score -= 3
 			}
-		case rules.StatusPass:
-			// Passing checks do not reduce score
+		case rules.StatusPass, rules.StatusSkip:
+			// Passing and skipped checks do not reduce score
 		}
 	}
 
@@ -46,8 +46,14 @@ func CalculateScore(findings []rules.Finding) int {
 	return score
 }
 
-// SummarizeFinding counts findings by status
+// SummarizeFinding counts pass, warn, and fail findings.
 func SummarizeFindings(findings []rules.Finding) (passed, warned, failed int) {
+	passed, warned, failed, _ = SummarizeFindingsWithSkipped(findings)
+	return
+}
+
+// SummarizeFindingsWithSkipped counts findings by status, including skipped checks.
+func SummarizeFindingsWithSkipped(findings []rules.Finding) (passed, warned, failed, skipped int) {
 	for _, f := range findings {
 		switch f.Status {
 		case rules.StatusPass:
@@ -56,6 +62,8 @@ func SummarizeFindings(findings []rules.Finding) (passed, warned, failed int) {
 			warned++
 		case rules.StatusFail:
 			failed++
+		case rules.StatusSkip:
+			skipped++
 		}
 	}
 	return

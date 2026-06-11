@@ -40,3 +40,26 @@ func TestRenderJSON_IncludesScoreAndFindings(t *testing.T) {
 		t.Errorf("expected docker finding, got %s", decoded.Findings[0].ID)
 	}
 }
+
+func TestRenderJSON_IncludesSkippedStatus(t *testing.T) {
+	var buf bytes.Buffer
+
+	if err := RenderJSON(&buf, sampleAuditReportWithSkip()); err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	var decoded AuditReport
+	if err := json.Unmarshal(buf.Bytes(), &decoded); err != nil {
+		t.Fatalf("failed to unmarshal JSON: %v", err)
+	}
+
+	if decoded.SkippedCount != 1 {
+		t.Errorf("expected skipped count 1, got %d", decoded.SkippedCount)
+	}
+	if len(decoded.Findings) != 2 {
+		t.Fatalf("expected 2 findings, got %d", len(decoded.Findings))
+	}
+	if decoded.Findings[1].Status != "skip" {
+		t.Errorf("expected skipped finding status to be skip, got %s", decoded.Findings[1].Status)
+	}
+}

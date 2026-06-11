@@ -47,8 +47,8 @@ func TestCheckDockerfileNonRootUser(t *testing.T) {
 
 	// Test when Dockerfile doesn't exist
 	finding := CheckDockerfileNonRootUser(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass when Dockerfile missing, got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip when Dockerfile missing, got %v", finding.Status)
 	}
 
 	// Test when Dockerfile has no USER instruction
@@ -79,8 +79,8 @@ func TestCheckDockerfileHealthcheck(t *testing.T) {
 
 	// Test when Dockerfile doesn't exist
 	finding := CheckDockerfileHealthcheck(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass when Dockerfile missing, got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip when Dockerfile missing, got %v", finding.Status)
 	}
 
 	// Test when Dockerfile has no HEALTHCHECK
@@ -104,8 +104,8 @@ func TestCheckDockerfileNoEnvCopy(t *testing.T) {
 
 	// Test when Dockerfile doesn't exist
 	finding := CheckDockerfileNoEnvCopy(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass when Dockerfile missing, got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip when Dockerfile missing, got %v", finding.Status)
 	}
 
 	// Test when Dockerfile doesn't copy .env
@@ -129,8 +129,8 @@ func TestCheckDockerfileNoSecretEnv(t *testing.T) {
 
 	// Test when Dockerfile doesn't exist
 	finding := CheckDockerfileNoSecretEnv(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass when Dockerfile missing, got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip when Dockerfile missing, got %v", finding.Status)
 	}
 
 	// Test when Dockerfile has no secret ENV

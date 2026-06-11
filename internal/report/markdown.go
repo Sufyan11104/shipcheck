@@ -24,6 +24,7 @@ func RenderMarkdown(w io.Writer, auditReport AuditReport) error {
 		{"Passed", fmt.Sprintf("%d", auditReport.PassedCount)},
 		{"Warnings", fmt.Sprintf("%d", auditReport.WarningCount)},
 		{"Failed", fmt.Sprintf("%d", auditReport.FailedCount)},
+		{"Skipped", fmt.Sprintf("%d", auditReport.SkippedCount)},
 	}
 
 	if _, err := fmt.Fprintln(w, "## Summary"); err != nil {

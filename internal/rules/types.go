@@ -17,18 +17,19 @@ const (
 	StatusPass Status = "pass"
 	StatusWarn Status = "warn"
 	StatusFail Status = "fail"
+	StatusSkip Status = "skip"
 )
 
 // Finding represents a single audit finding
 type Finding struct {
-	ID           string
-	Title        string
-	Category     string
-	Severity     Severity
-	Status       Status
-	Message      string
-	Remediation  string
-	Path         string // optional
+	ID          string
+	Title       string
+	Category    string
+	Severity    Severity
+	Status      Status
+	Message     string
+	Remediation string
+	Path        string // optional
 }
 
 // CheckResult groups findings by status
@@ -37,5 +38,6 @@ type CheckResult struct {
 	Passed   int
 	Warned   int
 	Failed   int
+	Skipped  int
 	Score    int
 }

@@ -45,7 +45,7 @@ func CheckWorkflowFileExists(path string) Finding {
 			Title:       ".github/workflows not found",
 			Category:    "ci",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     ".github/workflows directory not present; skipping workflow file check",
 			Remediation: "N/A",
 		}
@@ -164,7 +164,7 @@ func CheckDeployAfterTests(path string) Finding {
 			Title:       "Workflows not found",
 			Category:    "ci",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     ".github/workflows directory not present; skipping deploy order check",
 			Remediation: "N/A",
 		}
@@ -242,7 +242,7 @@ func CheckActionsPinned(path string) Finding {
 			Title:       "Workflows not found",
 			Category:    "ci",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     ".github/workflows directory not present; skipping action pinning check",
 			Remediation: "N/A",
 		}
@@ -332,7 +332,7 @@ func CheckNoSecretEcho(path string) Finding {
 			Title:       "Workflows not found",
 			Category:    "ci",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     ".github/workflows directory not present; skipping secret echo check",
 			Remediation: "N/A",
 		}
@@ -391,7 +391,7 @@ func CheckPermissionsDeclared(path string) Finding {
 			Title:       "Workflows not found",
 			Category:    "ci",
 			Severity:    SeverityLow,
-			Status:      StatusPass,
+			Status:      StatusSkip,
 			Message:     ".github/workflows directory not present; skipping permissions check",
 			Remediation: "N/A",
 		}

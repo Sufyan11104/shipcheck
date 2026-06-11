@@ -22,6 +22,7 @@ type AuditReport struct {
 	PassedCount        int             `json:"passedCount"`
 	WarningCount       int             `json:"warningCount"`
 	FailedCount        int             `json:"failedCount"`
+	SkippedCount       int             `json:"skippedCount"`
 	Findings           []ReportFinding `json:"findings"`
 }
 
@@ -39,7 +40,7 @@ type ReportFinding struct {
 
 // NewAuditReport builds a report from scanner and engine results.
 func NewAuditReport(result *scanner.ScanResult, findings []rules.Finding, score int) AuditReport {
-	passed, warned, failed := engine.SummarizeFindings(findings)
+	passed, warned, failed, skipped := engine.SummarizeFindingsWithSkipped(findings)
 
 	return AuditReport{
 		Path:               result.Path,
@@ -50,6 +51,7 @@ func NewAuditReport(result *scanner.ScanResult, findings []rules.Finding, score 
 		PassedCount:        passed,
 		WarningCount:       warned,
 		FailedCount:        failed,
+		SkippedCount:       skipped,
 		Findings:           toReportFindings(findings),
 	}
 }

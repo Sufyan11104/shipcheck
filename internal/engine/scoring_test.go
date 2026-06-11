@@ -32,6 +32,7 @@ func TestCalculateScore_HighFail(t *testing.T) {
 func TestCalculateScore_MixedFindings(t *testing.T) {
 	findings := []rules.Finding{
 		{Status: rules.StatusPass, Severity: rules.SeverityHigh},
+		{Status: rules.StatusSkip, Severity: rules.SeverityHigh},
 		{Status: rules.StatusWarn, Severity: rules.SeverityHigh},
 		{Status: rules.StatusFail, Severity: rules.SeverityMedium},
 	}
@@ -41,6 +42,18 @@ func TestCalculateScore_MixedFindings(t *testing.T) {
 	expected := 70
 	if score != expected {
 		t.Errorf("expected %d, got %d", expected, score)
+	}
+}
+
+func TestCalculateScore_SkipDoesNotReduceScore(t *testing.T) {
+	findings := []rules.Finding{
+		{Status: rules.StatusSkip, Severity: rules.SeverityHigh},
+		{Status: rules.StatusSkip, Severity: rules.SeverityMedium},
+	}
+
+	score := CalculateScore(findings)
+	if score != 100 {
+		t.Errorf("expected 100 for skipped findings, got %d", score)
 	}
 }
 
@@ -66,6 +79,8 @@ func TestSummarizeFindings(t *testing.T) {
 		{Status: rules.StatusFail},
 		{Status: rules.StatusFail},
 		{Status: rules.StatusFail},
+		{Status: rules.StatusSkip},
+		{Status: rules.StatusSkip},
 	}
 
 	passed, warned, failed := SummarizeFindings(findings)
@@ -78,5 +93,30 @@ func TestSummarizeFindings(t *testing.T) {
 	}
 	if failed != 3 {
 		t.Errorf("expected 3 failed, got %d", failed)
+	}
+}
+
+func TestSummarizeFindingsWithSkipped(t *testing.T) {
+	findings := []rules.Finding{
+		{Status: rules.StatusPass},
+		{Status: rules.StatusWarn},
+		{Status: rules.StatusFail},
+		{Status: rules.StatusSkip},
+		{Status: rules.StatusSkip},
+	}
+
+	passed, warned, failed, skipped := SummarizeFindingsWithSkipped(findings)
+
+	if passed != 1 {
+		t.Errorf("expected 1 passed, got %d", passed)
+	}
+	if warned != 1 {
+		t.Errorf("expected 1 warned, got %d", warned)
+	}
+	if failed != 1 {
+		t.Errorf("expected 1 failed, got %d", failed)
+	}
+	if skipped != 2 {
+		t.Errorf("expected 2 skipped, got %d", skipped)
 	}
 }

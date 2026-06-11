@@ -40,9 +40,10 @@ Score: %d/100
 Passed: %d
 Warnings: %d
 Failed: %d
+Skipped: %d
 
 Findings:
-`, auditReport.Path, gitRepo, auditReport.FilesScanned, auditReport.DirectoriesScanned, auditReport.Score, auditReport.PassedCount, auditReport.WarningCount, auditReport.FailedCount)
+`, auditReport.Path, gitRepo, auditReport.FilesScanned, auditReport.DirectoriesScanned, auditReport.Score, auditReport.PassedCount, auditReport.WarningCount, auditReport.FailedCount, auditReport.SkippedCount)
 
 	if _, err := fmt.Fprint(w, report); err != nil {
 		return err
@@ -67,6 +68,8 @@ func getSymbol(status rules.Status) string {
 		return "!"
 	case rules.StatusFail:
 		return "✗"
+	case rules.StatusSkip:
+		return "-"
 	default:
 		return "?"
 	}

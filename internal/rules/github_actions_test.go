@@ -29,8 +29,8 @@ func TestCheckWorkflowFileExists(t *testing.T) {
 
 	// Test when .github/workflows doesn't exist
 	finding := CheckWorkflowFileExists(tmpDir)
-	if finding.Status != StatusPass { // Graceful skip
-		t.Errorf("expected StatusPass (graceful skip), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip (graceful skip), got %v", finding.Status)
 	}
 
 	// Test when directory exists but no workflow files
@@ -99,8 +99,8 @@ func TestCheckDeployAfterTests(t *testing.T) {
 
 	// Test when no workflows exist
 	finding := CheckDeployAfterTests(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass (graceful skip), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip (graceful skip), got %v", finding.Status)
 	}
 
 	// Test when workflow has correct order (test before deploy)
@@ -125,8 +125,8 @@ func TestCheckActionsPinned(t *testing.T) {
 
 	// Test when no workflows exist
 	finding := CheckActionsPinned(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass (no actions), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip when workflows are missing, got %v", finding.Status)
 	}
 
 	// Test when workflow has pinned actions
@@ -151,8 +151,8 @@ func TestCheckNoSecretEcho(t *testing.T) {
 
 	// Test when no workflows exist
 	finding := CheckNoSecretEcho(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass (no secrets), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip when workflows are missing, got %v", finding.Status)
 	}
 
 	// Test when workflow doesn't echo secrets
@@ -177,8 +177,8 @@ func TestCheckPermissionsDeclared(t *testing.T) {
 
 	// Test when no workflows exist
 	finding := CheckPermissionsDeclared(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass (no workflows), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip when workflows are missing, got %v", finding.Status)
 	}
 
 	// Test when workflow lacks permissions block

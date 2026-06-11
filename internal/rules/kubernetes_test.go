@@ -40,8 +40,8 @@ func TestCheckK8sWorkloadExists(t *testing.T) {
 
 	// Test when no manifest exists
 	finding := CheckK8sWorkloadExists(tmpDir)
-	if finding.Status != StatusPass { // Graceful skip
-		t.Errorf("expected StatusPass (graceful skip), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip (graceful skip), got %v", finding.Status)
 	}
 
 	// Test when manifest exists but no workload
@@ -76,8 +76,8 @@ func TestCheckK8sReadinessProbeExists(t *testing.T) {
 
 	// Test when no manifest exists
 	finding := CheckK8sReadinessProbeExists(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass (graceful skip), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip (graceful skip), got %v", finding.Status)
 	}
 
 	// Test when manifest exists without readiness probe
@@ -126,8 +126,8 @@ func TestCheckK8sLivenessProbeExists(t *testing.T) {
 
 	// Test when no manifest exists
 	finding := CheckK8sLivenessProbeExists(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass (graceful skip), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip (graceful skip), got %v", finding.Status)
 	}
 
 	// Test when manifest exists without liveness probe
@@ -178,8 +178,8 @@ func TestCheckK8sResourceRequests(t *testing.T) {
 
 	// Test when no manifest exists
 	finding := CheckK8sResourceRequests(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass (graceful skip), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip (graceful skip), got %v", finding.Status)
 	}
 
 	// Test when manifest exists without resource requests
@@ -228,8 +228,8 @@ func TestCheckK8sResourceLimits(t *testing.T) {
 
 	// Test when no manifest exists
 	finding := CheckK8sResourceLimits(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass (graceful skip), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip (graceful skip), got %v", finding.Status)
 	}
 
 	// Test when manifest exists without resource limits
@@ -278,8 +278,8 @@ func TestCheckK8sNoLatestImageTag(t *testing.T) {
 
 	// Test when no manifest exists
 	finding := CheckK8sNoLatestImageTag(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass (graceful skip), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip (graceful skip), got %v", finding.Status)
 	}
 
 	// Test when manifest has specific tag
@@ -324,8 +324,8 @@ func TestCheckK8sReplicasConfigured(t *testing.T) {
 
 	// Test when no manifest exists
 	finding := CheckK8sReplicasConfigured(tmpDir)
-	if finding.Status != StatusPass {
-		t.Errorf("expected StatusPass (graceful skip), got %v", finding.Status)
+	if finding.Status != StatusSkip {
+		t.Errorf("expected StatusSkip (graceful skip), got %v", finding.Status)
 	}
 
 	// Test when Deployment has no replicas field
