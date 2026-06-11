@@ -4,6 +4,8 @@
 
 A Go CLI static-analysis tool that audits repositories for deployment readiness.
 
+Example repositories are available under `examples/` and demo commands are documented in `docs/demo.md`.
+
 ## Current Capabilities (Stage 7)
 
 - CLI with `version` and `audit` commands

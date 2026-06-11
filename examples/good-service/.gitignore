@@ -1,0 +1,8 @@
+.env
+bin/
+dist/
+tmp/
+coverage.out
+.terraform/
+*.tfstate
+*.tfstate.backup

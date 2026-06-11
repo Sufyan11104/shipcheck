@@ -1,0 +1,14 @@
+name: ci
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout
+      - run: go build ./cmd/risky-service
+      - run: echo "deploy risky service"
+      - run: echo ${{ secrets.EXAMPLE_TOKEN }}
+      - run: go test ./...

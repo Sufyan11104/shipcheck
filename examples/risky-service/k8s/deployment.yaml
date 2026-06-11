@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: risky-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: risky-service
+  template:
+    metadata:
+      labels:
+        app: risky-service
+    spec:
+      containers:
+        - name: risky-service
+          image: example/risky-service:latest
+          ports:
+            - containerPort: 8080
