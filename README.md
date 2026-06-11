@@ -68,6 +68,8 @@ make run
 make test
 ```
 
+CI runs tests and vet on pushes and pull requests. The workflow also runs ShipCheck against this repository and the `examples/good-service` fixture.
+
 ## Development
 
 - **CLI entrypoint**: `cmd/shipcheck/main.go`
