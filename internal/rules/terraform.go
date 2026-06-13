@@ -325,6 +325,12 @@ func CheckTerraformLockfilePresent(path string) Finding {
 	}
 }
 
+// HasTerraformFiles reports whether Terraform or tfvars files exist.
+func HasTerraformFiles(path string) bool {
+	tfFiles, tfVarsFiles := findTerraformFiles(path)
+	return len(tfFiles)+len(tfVarsFiles) > 0
+}
+
 func findTerraformFiles(path string) (tfFiles []string, tfVarsFiles []string) {
 	filepath.WalkDir(path, func(filePath string, entry os.DirEntry, err error) error {
 		if err != nil {

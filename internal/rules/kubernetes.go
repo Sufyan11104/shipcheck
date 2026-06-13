@@ -404,6 +404,11 @@ func CheckK8sReplicasConfigured(path string) Finding {
 	}
 }
 
+// HasK8sManifest reports whether the directory contains Kubernetes-like YAML files.
+func HasK8sManifest(path string) bool {
+	return hasK8sManifest(path)
+}
+
 // hasK8sManifest checks if directory contains Kubernetes-like YAML files
 func hasK8sManifest(path string) bool {
 	k8sIndicators := []string{"apiversion:", "kind:", "metadata:", "spec:", "containers:"}

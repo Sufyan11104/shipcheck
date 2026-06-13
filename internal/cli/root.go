@@ -72,7 +72,7 @@ func handleAudit(args []string, w io.Writer) error {
 	}
 
 	eng := engine.NewEngine(result.Path)
-	findings, _ := eng.RunChecks(result.IsGitRepository)
+	findings, _ := eng.RunChecksWithCategories(result.IsGitRepository, options.categories)
 	findings = engine.FilterFindingsByCategory(findings, options.categories)
 	score := engine.CalculateScore(findings)
 
