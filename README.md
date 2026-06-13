@@ -1,22 +1,22 @@
 # ShipCheck
 
-ShipCheck is a Go CLI static analyser that scans repositories for deployment-readiness signals across common DevOps files.
+ShipCheck is a Go CLI that audits repositories for deployment-readiness signals across Docker, GitHub Actions, Kubernetes, Terraform, and environment-file hygiene.
 
-It is a portfolio and learning project for turning practical deployment hygiene checks into a small, CI-friendly command-line tool. ShipCheck does not try to prove that an application is safe to deploy. It gives early warnings about missing or risky repository, Docker, GitHub Actions, Kubernetes, and Terraform patterns before they become operational problems.
+## Why ShipCheck
 
-## Why It Exists
+Repositories often contain deployment risks in plain text configuration files before anything reaches production. ShipCheck gives a quick static overview of whether a project has the basic signals expected from a deployable service: tests in CI, pinned actions, container health checks, Kubernetes probes, Terraform provider constraints, and safe environment-file conventions.
 
-Small services often accumulate deployment risk in plain text files: a Dockerfile without a non-root user, a workflow with no permissions block, a Kubernetes deployment without probes, or Terraform without provider constraints. ShipCheck collects those checks into one lightweight audit so a developer can quickly see where a repository needs attention.
+## Features
 
-## What It Checks
-
-- Repository hygiene: README, `.gitignore`, `.env`, and `.env.example` signals
-- Docker readiness: Dockerfile presence, `.dockerignore`, non-root `USER`, `HEALTHCHECK`, `.env` copy detection, and secret-like `ARG`/`ENV` names
-- GitHub Actions: workflow presence, test/build steps, deploy-before-test ordering, action pinning, secret echo patterns, and explicit permissions
-- Kubernetes: manifest/workload detection, readiness and liveness probes, resource requests/limits, image tags, and replica configuration
-- Terraform/IaC: Terraform files, fmt/validate automation hints, required providers, provider version constraints, backend block, suspicious variable defaults, and lockfile presence
-
-See [docs/rules.md](docs/rules.md) for rule details and limitations.
+- Static repository audit
+- Dockerfile and `.dockerignore` checks
+- GitHub Actions CI/CD checks
+- Kubernetes manifest readiness checks
+- Terraform/IaC checks
+- Environment-file hygiene checks
+- Text, JSON, and Markdown reports
+- Category filtering
+- CI-friendly score thresholds
 
 ## Quick Start
 
@@ -32,33 +32,6 @@ make build
 ./bin/shipcheck audit .
 ```
 
-## Example Commands
-
-Audit the current repository:
-
-```bash
-go run ./cmd/shipcheck audit .
-```
-
-Audit one example service:
-
-```bash
-go run ./cmd/shipcheck audit examples/good-service
-go run ./cmd/shipcheck audit examples/risky-service
-```
-
-Focus on Docker checks:
-
-```bash
-go run ./cmd/shipcheck audit examples/risky-service --category docker
-```
-
-Use ShipCheck as a CI threshold:
-
-```bash
-go run ./cmd/shipcheck audit . --category repo,env,ci --fail-under 70
-```
-
 ## Example Output
 
 ```text
@@ -71,67 +44,109 @@ Failed: 1
 Skipped: 0
 
 ! docker.dockerfile_non_root_user - No non-root USER instruction detected in Dockerfile
-x docker.dockerfile_no_env_copy - Dockerfile may be copying .env file directly
 ! k8s.readiness_probe_exists - No readiness probe detected in containers
+! terraform.backend_configured - No backend block detected; remote state may be needed for team or production use.
 ```
 
-## Report Formats
+## Commands And Flags
 
-Text output is the default:
+Audit a repository:
 
 ```bash
 go run ./cmd/shipcheck audit .
+go run ./cmd/shipcheck audit examples/good-service
 ```
 
-JSON and Markdown are available for automation, reports, or pull request comments:
+Choose an output format:
 
 ```bash
+go run ./cmd/shipcheck audit . --format text
 go run ./cmd/shipcheck audit . --format json
 go run ./cmd/shipcheck audit . --format markdown
 ```
 
-## Category Filtering
-
-Use `--category` to limit the audit to one or more rule groups:
+Run selected categories:
 
 ```bash
-go run ./cmd/shipcheck audit . --category docker
-go run ./cmd/shipcheck audit . --category repo,env,ci
+go run ./cmd/shipcheck audit . --category docker,ci,k8s
+go run ./cmd/shipcheck audit . --category terraform,env,docs,repo
 ```
 
-Supported categories are `ci`, `docker`, `docs`, `env`, `k8s`, `repo`, and `terraform`.
-
-## CI Thresholds
-
-`--fail-under` exits with a non-zero status when the calculated score is below the requested threshold:
+Fail when the score is below a threshold:
 
 ```bash
 go run ./cmd/shipcheck audit . --fail-under 80
 ```
 
-ShipCheck's own GitHub Actions workflow runs tests, `go vet`, and targeted ShipCheck audits on pushes and pull requests. See [docs/ci.md](docs/ci.md) for CI usage notes.
+Supported flags:
+
+- `--format text|json|markdown`
+- `--category docker,ci,k8s,terraform,env,docs,repo`
+- `--fail-under 80`
+
+## Rule Categories
+
+| Category | Checks |
+| --- | --- |
+| `repo` / `docs` / `env` | README, `.gitignore`, `.env`, and `.env.example` signals |
+| Docker | Dockerfile presence, `.dockerignore`, non-root `USER`, `HEALTHCHECK`, `.env` copy detection, secret-like `ARG`/`ENV` names |
+| GitHub Actions | Workflow files, test/build steps, deploy-before-test ordering, action pinning, secret echo patterns, explicit permissions |
+| Kubernetes | Manifest and workload detection, readiness/liveness probes, resource requests/limits, image tags, replica configuration |
+| Terraform | Terraform files, fmt/validate automation hints, required providers, provider version constraints, backend block, variable defaults, lockfile |
+
+See [docs/rules.md](docs/rules.md) for more detail on rule behavior and limitations.
 
 ## Example Repositories
 
-- `examples/good-service`: a small service fixture with healthy Docker, CI, Kubernetes, and Terraform patterns.
-- `examples/risky-service`: a small service fixture with intentional readiness issues using fake placeholder values only.
+ShipCheck includes two small fixtures for comparing healthy and risky deployment patterns:
 
-Demo commands are documented in [docs/demo.md](docs/demo.md).
+- `examples/good-service`: healthy Docker, GitHub Actions, Kubernetes, and Terraform signals.
+- `examples/risky-service`: intentional readiness issues using fake placeholder values only.
+
+Try them with:
+
+```bash
+go run ./cmd/shipcheck audit examples/good-service
+go run ./cmd/shipcheck audit examples/risky-service
+```
+
+More demo commands are in [docs/demo.md](docs/demo.md).
+
+## Using In CI
+
+ShipCheck can be used as a lightweight CI gate with a score threshold:
+
+```bash
+go run ./cmd/shipcheck audit . --category repo,env,ci --fail-under 70
+```
+
+Minimal GitHub Actions example:
+
+```yaml
+- uses: actions/checkout@v4
+- uses: actions/setup-go@v5
+  with:
+    go-version: "1.22"
+- run: go test ./...
+- run: go vet ./...
+- run: go run ./cmd/shipcheck audit . --category repo,env,ci --fail-under 70
+```
+
+See [docs/ci.md](docs/ci.md) for CI usage notes.
+
+## Output Formats
+
+- `text`: human-readable terminal output
+- `json`: structured output for automation
+- `markdown`: readable reports for artifacts, issues, or comments
 
 ## Limitations
 
-- ShipCheck is static analysis only.
-- Checks are heuristic and intentionally lightweight.
-- ShipCheck does not run Docker, Kubernetes, Terraform, or cloud APIs.
-- It does not guarantee deployment safety.
-- It is not a replacement for dedicated tools such as Hadolint, actionlint, kube-score, Checkov, Trivy, or Terraform's own validation commands.
-
-## Roadmap
-
-- SARIF output for code scanning integrations
-- Configuration file for rule selection and thresholds
-- Rule suppression for accepted risks
-- Richer YAML and HCL parsing
+- Static analysis only
+- Heuristic checks
+- Does not run Docker, `kubectl`, Terraform, or cloud APIs
+- Does not replace specialised tools such as Hadolint, actionlint, kube-score, Checkov, Trivy, or `terraform validate`
+- Does not guarantee deployment safety
 
 ## Development
 
@@ -141,7 +156,7 @@ go vet ./...
 make build
 ```
 
-Useful project areas:
+## Project Layout
 
 - `cmd/shipcheck`: CLI entrypoint
 - `internal/cli`: command parsing and flag handling
@@ -149,8 +164,13 @@ Useful project areas:
 - `internal/rules`: rule implementations
 - `internal/engine`: rule orchestration, scoring, and filtering
 - `internal/report`: text, JSON, and Markdown output
-- `examples/`: demo fixtures
+- `examples`: demo repositories
+- `docs`: rule, CI, demo, and architecture notes
 
-## CV / Project Summary
+## Roadmap
 
-- Built ShipCheck, a Go CLI DevOps static-analysis tool that audits repository, Docker, CI, Kubernetes, and Terraform readiness signals, supports JSON/Markdown output and CI thresholds, and includes realistic demo fixtures plus GitHub Actions CI.
+- SARIF output
+- `.shipcheck.yaml` configuration
+- Rule suppressions
+- Richer YAML/HCL parsing
+- More rule packs
