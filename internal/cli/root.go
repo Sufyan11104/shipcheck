@@ -3,10 +3,12 @@ package cli
 import (
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/Sufyan11104/shipcheck/internal/dashboard"
 	"github.com/Sufyan11104/shipcheck/internal/engine"
 	"github.com/Sufyan11104/shipcheck/internal/report"
 	"github.com/Sufyan11104/shipcheck/internal/scanner"
@@ -17,6 +19,13 @@ type auditOptions struct {
 	path       string
 	format     string
 	failUnder  int
+	categories []string
+	verbose    bool
+}
+
+type serveOptions struct {
+	path       string
+	addr       string
 	categories []string
 }
 
@@ -55,6 +64,9 @@ func RunWithWriter(args []string, w io.Writer) error {
 	case "audit":
 		return handleAudit(args[1:], w)
 
+	case "serve":
+		return handleServe(args[1:], w)
+
 	default:
 		return fmt.Errorf("unknown command: %s", command)
 	}
@@ -77,7 +89,7 @@ func handleAudit(args []string, w io.Writer) error {
 	score := engine.CalculateScore(findings)
 
 	auditReport := report.NewAuditReport(result, findings, score)
-	if err := report.Render(w, auditReport, options.format); err != nil {
+	if err := renderAuditReport(w, auditReport, options); err != nil {
 		return err
 	}
 
@@ -89,6 +101,34 @@ func handleAudit(args []string, w io.Writer) error {
 	}
 
 	return nil
+}
+
+func handleServe(args []string, w io.Writer) error {
+	options, err := parseServeArgs(args)
+	if err != nil {
+		return err
+	}
+
+	if _, err := dashboard.BuildReport(options.path, options.categories); err != nil {
+		return err
+	}
+
+	addr := options.addr
+	fmt.Fprintf(w, "ShipCheck dashboard running at http://%s\n", addr)
+
+	handler := dashboard.NewHandler(options.path, options.categories)
+	if err := http.ListenAndServe(addr, handler); err != nil {
+		return fmt.Errorf("failed to start dashboard server at %s: %w", addr, err)
+	}
+
+	return nil
+}
+
+func renderAuditReport(w io.Writer, auditReport report.AuditReport, options auditOptions) error {
+	if options.format == report.FormatText {
+		return report.RenderTextWithOptions(w, auditReport, report.TextOptions{Verbose: options.verbose})
+	}
+	return report.Render(w, auditReport, options.format)
 }
 
 // EvaluateFailUnder returns an ExitError if score is below threshold.
@@ -151,6 +191,8 @@ func parseAuditArgs(args []string) (auditOptions, error) {
 			if err := setCategories(&options, strings.TrimPrefix(arg, "--category=")); err != nil {
 				return options, err
 			}
+		case arg == "--verbose":
+			options.verbose = true
 		case strings.HasPrefix(arg, "-"):
 			return options, fmt.Errorf("unknown audit flag: %s", arg)
 		default:
@@ -163,6 +205,59 @@ func parseAuditArgs(args []string) (auditOptions, error) {
 
 	if options.path == "" {
 		return options, fmt.Errorf("audit requires a path argument")
+	}
+
+	return options, nil
+}
+
+func parseServeArgs(args []string) (serveOptions, error) {
+	options := serveOptions{
+		path: ".",
+		addr: "localhost:8080",
+	}
+	pathSet := false
+
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+
+		switch {
+		case arg == "--addr":
+			value, next, err := requireFlagValue(args, i, "--addr")
+			if err != nil {
+				return options, err
+			}
+			i = next
+			options.addr = strings.TrimSpace(value)
+			if options.addr == "" {
+				return options, fmt.Errorf("--addr requires a value")
+			}
+		case strings.HasPrefix(arg, "--addr="):
+			options.addr = strings.TrimSpace(strings.TrimPrefix(arg, "--addr="))
+			if options.addr == "" {
+				return options, fmt.Errorf("--addr requires a value")
+			}
+		case arg == "--category":
+			value, next, err := requireFlagValue(args, i, "--category")
+			if err != nil {
+				return options, err
+			}
+			i = next
+			if err := setServeCategories(&options, value); err != nil {
+				return options, err
+			}
+		case strings.HasPrefix(arg, "--category="):
+			if err := setServeCategories(&options, strings.TrimPrefix(arg, "--category=")); err != nil {
+				return options, err
+			}
+		case strings.HasPrefix(arg, "-"):
+			return options, fmt.Errorf("unknown serve flag: %s", arg)
+		default:
+			if pathSet {
+				return options, fmt.Errorf("unexpected argument: %s", arg)
+			}
+			options.path = arg
+			pathSet = true
+		}
 	}
 
 	return options, nil
@@ -201,6 +296,16 @@ func setFailUnder(options *auditOptions, value string) error {
 }
 
 func setCategories(options *auditOptions, value string) error {
+	categories, err := engine.ParseCategoryFilter(value)
+	if err != nil {
+		return err
+	}
+
+	options.categories = categories
+	return nil
+}
+
+func setServeCategories(options *serveOptions, value string) error {
 	categories, err := engine.ParseCategoryFilter(value)
 	if err != nil {
 		return err

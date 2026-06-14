@@ -32,6 +32,22 @@ make build
 ./bin/shipcheck audit .
 ```
 
+## Local Dashboard
+
+Run a local browser dashboard for the current repository:
+
+```bash
+go run ./cmd/shipcheck serve .
+open http://localhost:8080
+```
+
+Use a different address when needed:
+
+```bash
+go run ./cmd/shipcheck serve examples/good-service --addr localhost:8081
+open http://localhost:8081
+```
+
 ## Example Output
 
 ```text
