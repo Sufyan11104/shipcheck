@@ -14,15 +14,17 @@ func Render(w io.Writer, auditReport AuditReport, format string) error {
 		return RenderJSON(w, auditReport)
 	case FormatMarkdown:
 		return RenderMarkdown(w, auditReport)
+	case FormatSARIF:
+		return RenderSARIF(w, auditReport)
 	default:
-		return fmt.Errorf("unknown report format %q (valid: text, json, markdown)", format)
+		return fmt.Errorf("unknown report format %q (valid: text, json, markdown, sarif)", format)
 	}
 }
 
 // IsValidFormat returns whether format is a supported report format.
 func IsValidFormat(format string) bool {
 	switch format {
-	case FormatText, FormatJSON, FormatMarkdown:
+	case FormatText, FormatJSON, FormatMarkdown, FormatSARIF:
 		return true
 	default:
 		return false

@@ -30,6 +30,7 @@ type Finding struct {
 	Message     string
 	Remediation string
 	Path        string // optional
+	Evidence    string // optional, concise evidence only
 }
 
 // CheckResult groups findings by status

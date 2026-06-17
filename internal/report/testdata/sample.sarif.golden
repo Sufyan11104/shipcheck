@@ -1,0 +1,115 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "ShipCheck",
+          "informationUri": "https://github.com/Sufyan11104/shipcheck",
+          "version": "0.1.0",
+          "rules": [
+            {
+              "id": "docker.dockerfile_non_root_user",
+              "name": "No non-root USER instruction",
+              "shortDescription": {
+                "text": "No non-root USER instruction"
+              },
+              "fullDescription": {
+                "text": "No non-root USER instruction detected in Dockerfile"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Add a non-root user and switch to it with USER before the final command."
+              },
+              "properties": {
+                "category": "docker",
+                "shipcheckSeverity": "medium",
+                "tags": [
+                  "shipcheck",
+                  "docker",
+                  "medium"
+                ]
+              }
+            },
+            {
+              "id": "env.env_not_committed",
+              "name": ".env file detected",
+              "shortDescription": {
+                "text": ".env file detected"
+              },
+              "fullDescription": {
+                "text": ".env file found - ensure it is in .gitignore to prevent accidental commits"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Add .env to .gitignore and use .env.example for template"
+              },
+              "properties": {
+                "category": "env",
+                "shipcheckSeverity": "high",
+                "tags": [
+                  "shipcheck",
+                  "env",
+                  "high"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "docker.dockerfile_non_root_user",
+          "level": "warning",
+          "message": {
+            "text": "No non-root USER instruction detected in Dockerfile"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "services/api/Dockerfile"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "category": "docker",
+            "evidence": "USER root",
+            "remediation": "Add a non-root user and switch to it with USER before the final command.",
+            "shipcheckSeverity": "medium",
+            "shipcheckStatus": "warn"
+          }
+        },
+        {
+          "ruleId": "env.env_not_committed",
+          "level": "error",
+          "message": {
+            "text": ".env file found - ensure it is in .gitignore to prevent accidental commits"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": ".env"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "category": "env",
+            "evidence": "SECRET_KEY=[redacted] PUBLIC=ok",
+            "remediation": "Add .env to .gitignore and use .env.example for template",
+            "shipcheckSeverity": "high",
+            "shipcheckStatus": "fail"
+          }
+        }
+      ]
+    }
+  ]
+}

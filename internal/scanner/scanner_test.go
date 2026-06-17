@@ -9,7 +9,7 @@ import (
 func TestScan_ValidDirectory(t *testing.T) {
 	// Create a temporary directory structure
 	tmpDir := t.TempDir()
-	
+
 	// Create some test files and directories
 	os.Mkdir(filepath.Join(tmpDir, "subdir1"), 0755)
 	os.Mkdir(filepath.Join(tmpDir, "subdir2"), 0755)

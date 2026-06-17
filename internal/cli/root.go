@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -21,6 +22,7 @@ type auditOptions struct {
 	failUnder  int
 	categories []string
 	verbose    bool
+	output     string
 }
 
 type serveOptions struct {
@@ -125,10 +127,50 @@ func handleServe(args []string, w io.Writer) error {
 }
 
 func renderAuditReport(w io.Writer, auditReport report.AuditReport, options auditOptions) error {
+	if options.output != "" {
+		return writeReportFile(options.output, func(file io.Writer) error {
+			return renderAuditReportToWriter(file, auditReport, options)
+		})
+	}
+
+	return renderAuditReportToWriter(w, auditReport, options)
+}
+
+func renderAuditReportToWriter(w io.Writer, auditReport report.AuditReport, options auditOptions) error {
 	if options.format == report.FormatText {
 		return report.RenderTextWithOptions(w, auditReport, report.TextOptions{Verbose: options.verbose})
 	}
 	return report.Render(w, auditReport, options.format)
+}
+
+func writeReportFile(path string, render func(io.Writer) error) error {
+	dir := filepath.Dir(path)
+	base := filepath.Base(path)
+	tmpFile, err := os.CreateTemp(dir, "."+base+".tmp-*")
+	if err != nil {
+		return fmt.Errorf("failed to create temporary output file for %s: %w", path, err)
+	}
+	tmpPath := tmpFile.Name()
+	keepTemp := false
+	defer func() {
+		if !keepTemp {
+			_ = os.Remove(tmpPath)
+		}
+	}()
+
+	if err := render(tmpFile); err != nil {
+		_ = tmpFile.Close()
+		return fmt.Errorf("failed to render output file %s: %w", path, err)
+	}
+	if err := tmpFile.Close(); err != nil {
+		return fmt.Errorf("failed to close temporary output file for %s: %w", path, err)
+	}
+	if err := os.Rename(tmpPath, path); err != nil {
+		return fmt.Errorf("failed to write output file %s: %w", path, err)
+	}
+	keepTemp = true
+
+	return nil
 }
 
 // EvaluateFailUnder returns an ExitError if score is below threshold.
@@ -193,6 +235,19 @@ func parseAuditArgs(args []string) (auditOptions, error) {
 			}
 		case arg == "--verbose":
 			options.verbose = true
+		case arg == "--output":
+			value, next, err := requireFlagValue(args, i, "--output")
+			if err != nil {
+				return options, err
+			}
+			i = next
+			if err := setOutput(&options, value); err != nil {
+				return options, err
+			}
+		case strings.HasPrefix(arg, "--output="):
+			if err := setOutput(&options, strings.TrimPrefix(arg, "--output=")); err != nil {
+				return options, err
+			}
 		case strings.HasPrefix(arg, "-"):
 			return options, fmt.Errorf("unknown audit flag: %s", arg)
 		default:
@@ -275,7 +330,7 @@ func requireFlagValue(args []string, index int, name string) (string, int, error
 func setFormat(options *auditOptions, value string) error {
 	format := strings.ToLower(strings.TrimSpace(value))
 	if !report.IsValidFormat(format) {
-		return fmt.Errorf("unknown report format %q (valid: text, json, markdown)", value)
+		return fmt.Errorf("unknown report format %q (valid: text, json, markdown, sarif)", value)
 	}
 
 	options.format = format
@@ -302,6 +357,16 @@ func setCategories(options *auditOptions, value string) error {
 	}
 
 	options.categories = categories
+	return nil
+}
+
+func setOutput(options *auditOptions, value string) error {
+	output := strings.TrimSpace(value)
+	if output == "" {
+		return fmt.Errorf("--output requires a value")
+	}
+
+	options.output = output
 	return nil
 }
 

@@ -8,11 +8,11 @@ import (
 
 // ScanResult holds the results of a directory scan
 type ScanResult struct {
-	Path              string
-	FileCount         int64
-	DirectoryCount    int64
-	IsGitRepository   bool
-	Error             error
+	Path            string
+	FileCount       int64
+	DirectoryCount  int64
+	IsGitRepository bool
+	Error           error
 }
 
 // Scan performs a recursive scan of the given path

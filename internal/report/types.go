@@ -10,6 +10,7 @@ const (
 	FormatText     = "text"
 	FormatJSON     = "json"
 	FormatMarkdown = "markdown"
+	FormatSARIF    = "sarif"
 )
 
 // AuditReport is the stable report model used by all output formats.
@@ -36,6 +37,7 @@ type ReportFinding struct {
 	Message     string         `json:"message"`
 	Remediation string         `json:"remediation"`
 	Path        string         `json:"path,omitempty"`
+	Evidence    string         `json:"evidence,omitempty"`
 }
 
 // NewAuditReport builds a report from scanner and engine results.
@@ -68,6 +70,7 @@ func toReportFindings(findings []rules.Finding) []ReportFinding {
 			Message:     finding.Message,
 			Remediation: finding.Remediation,
 			Path:        finding.Path,
+			Evidence:    finding.Evidence,
 		})
 	}
 
